@@ -3,10 +3,13 @@ package com.alphawallet.app.widget;
 import static com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResult;
@@ -26,6 +29,8 @@ import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.analytics.ActionSheetMode;
 import com.alphawallet.app.repository.EthereumNetworkBase;
+import com.alphawallet.app.ui.widget.entity.ScrollControlViewPager;
+import com.alphawallet.app.util.SendDisplayJsonProcesser;
 import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
@@ -49,6 +54,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import io.realm.Realm;
 
@@ -61,6 +67,7 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
     private final GasWidget2 gasWidget;
     private final GasWidget gasWidgetLegacy;
     private final BalanceDisplayWidget balanceDisplay;
+    private final JsonViewWidget jsonDisplay;
     private final NetworkDisplayWidget networkDisplay;
     private final ConfirmationWidget confirmationWidget;
     private final AddressDetailView addressDetail;
@@ -87,6 +94,7 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
     private Transaction transaction;
     private final WalletType walletType;
 
+
     public ActionSheetDialog(@NonNull Activity activity, Web3Transaction tx, Token t,
                              String destName, String destAddress, TokensService ts,
                              ActionSheetCallback aCallBack)
@@ -110,6 +118,11 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         amountDisplay = findViewById(R.id.amount_display);
         assetDetailView = findViewById(R.id.asset_detail);
         functionBar = findViewById(R.id.layoutButtons);
+
+        SendDisplayJsonProcesser.setRecipientWalletAddress(destAddress);
+        jsonDisplay = findViewById(R.id.json_detail);
+        jsonDisplay.getJsonData();
+
         this.activity = activity;
         if (activity instanceof HomeActivity)
         {
@@ -191,6 +204,11 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         gasWidgetLegacy.setVisibility(View.GONE);
         networkDisplay.setVisibility(View.GONE);
         functionBar.revealButtons();
+
+        balanceDisplay.setVisibility(View.GONE);
+        addressDetail.setVisibility(View.GONE);
+        amountDisplay.setVisibility(View.GONE);
+        jsonDisplay.setVisibility(View.VISIBLE);
     }
 
     // wallet connect request
@@ -210,6 +228,9 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         walletConnectRequestWidget = findViewById(R.id.wallet_connect_widget);
         gasWidget = null;
         balanceDisplay = null;
+
+        jsonDisplay = null;
+
         networkDisplay = null;
         confirmationWidget = null;
         addressDetail = null;
@@ -238,6 +259,7 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
 
         setActionSheetStatus(EthereumNetworkBase.isChainSupported(chainIdOverride) ?
             ActionSheetStatus.OK : ActionSheetStatus.ERROR_INVALID_CHAIN);
+
     }
 
     // switch chain
@@ -261,6 +283,9 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
 
         gasWidget = null;
         balanceDisplay = null;
+
+        jsonDisplay = null;
+
         networkDisplay = null;
         confirmationWidget = null;
         addressDetail = null;
@@ -294,6 +319,9 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         gasWidget = null;
         gasWidgetLegacy = null;
         balanceDisplay = null;
+
+        jsonDisplay = null;
+
         networkDisplay = null;
         confirmationWidget = null;
         addressDetail = null;
